@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Tomato Hunter ${{ github.ref_name }}"
+          releaseBody: |
+            🍅 Tomato Hunter 内测版本
+
+            ## 安装说明
+            - **Windows**: 下载 `.msi` 文件，双击安装。首次运行可能弹出 SmartScreen 警告，点击"更多信息"→"仍要运行"
+            - **macOS (Apple Silicon)**: 下载 `aarch64.dmg`，拖入 Applications。首次打开时右键→打开，或在系统设置→隐私与安全中允许
+            - **macOS (Intel)**: 下载 `x64.dmg`
+          releaseDraft: false
+          prerelease: true
+          args: --target ${{ matrix.target }}

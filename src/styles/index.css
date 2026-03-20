@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+/* Zpix 像素字体 */
+@font-face {
+  font-family: "Zpix";
+  src: url("/fonts/zpix.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Tailwind v4 自定义主题 — 番茄列车色板 */
+@theme {
+  --font-pixel: "Zpix", monospace;
+
+  /* 番茄列车核心色板 */
+  --color-sky: #55BBEE;
+  --color-grass: #5BBF47;
+  --color-tomato: #EE4433;
+  --color-sunny: #FFD93D;
+  --color-cloud: #FFFFFF;
+  --color-pixel-black: #333333;
+  --color-orange: #FF8844;
+  --color-cream: #FFF8E8;
+  --color-deep-blue: #3366AA;
+  --color-pink: #FFCCDD;
+  --color-mint: #88DDAA;
+  --color-light-blue: #DDEEFF;
+
+  /* 怪物/战斗专用 */
+  --color-monster-bg: #443355;
+  --color-monster-border: #333333;
+
+  /* 向后兼容映射 */
+  --color-village-bg: #55BBEE;
+  --color-village-warm: #FFF8E8;
+  --color-village-header: #55BBEE;
+}
+
+/* 像素描边系统 — 番茄列车规范 */
+.pixel-border {
+  outline: 2px solid #333333;
+  outline-offset: -2px;
+  box-shadow: 2px 2px 0 0 rgba(0, 0, 0, 0.2);
+}
+
+.pixel-border-light {
+  outline: 2px solid #333333;
+  outline-offset: -2px;
+  box-shadow: 2px 2px 0 0 rgba(0, 0, 0, 0.1);
+}
+
+.pixel-border-dark {
+  outline: 2px solid #333333;
+  outline-offset: -2px;
+  box-shadow: 2px 2px 0 0 rgba(0, 0, 0, 0.4);
+}
+
+.pixel-title {
+  font-family: "Zpix", monospace;
+  letter-spacing: 0.05em;
+}
+
+/* 怪物像素精灵 */
+.monster-sprite {
+  font-size: 48px;
+  line-height: 1;
+  image-rendering: pixelated;
+  filter: contrast(1.1);
+}
+.monster-sprite-sm {
+  font-size: 24px;
+  line-height: 1;
+  image-rendering: pixelated;
+}
+
+/* 拖延可视化 — 番茄被囚禁太久在枯萎 */
+.captive-fade-1 {
+  filter: saturate(0.8);
+}
+.captive-fade-2 {
+  filter: saturate(0.5);
+  border-color: #6b7280;
+}
+.captive-fade-3 {
+  filter: saturate(0.3);
+  border-color: #4b5563;
+  opacity: 0.85;
+}
+
+/* 基础尺寸 — 桌面应用适配（仅主窗口） */
+html:not(.hunt-window) {
+  font-size: 18px;
+}
+
+/* 狩猎浮窗 — 紧凑尺寸，无多余边距 */
+html.hunt-window,
+html.hunt-window body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-size: 16px;
+}
+
+/* 像素化渲染 */
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}

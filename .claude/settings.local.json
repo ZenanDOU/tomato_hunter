@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(which cargo:*)",
+      "Read(//d/AI_auto/potato_hunter/$HOME/.cargo/bin/**)",
+      "Read(//c/Users/DOU/.cargo/bin/**)",
+      "Bash(\"$HOME/.cargo/bin/cargo\" --version 2>/dev/null || cargo --version 2>/dev/null || echo \"CARGO_NOT_FOUND\")",
+      "Bash(export:*)",
+      "Bash(cp:*)",
+      "Bash(openspec new:*)",
+      "Bash(openspec status:*)",
+      "Bash(openspec instructions:*)",
+      "Bash(npm list:*)",
+      "Bash(openspec list:*)",
+      "Bash(echo:*)",
+      "Bash(ls:*)",
+      "Bash(python3:*)",
+      "Bash(python:*)",
+      "Bash(PYTHONIOENCODING=utf-8 python -c \"\nfrom zipfile import ZipFile\nfrom xml.etree import ElementTree\nimport sys\nsys.stdout.reconfigure\\(encoding='utf-8'\\)\n\ndocx_path = 'D:/AI_auto/tomato_hunter/docs/番茄列车_游戏设计规范文档.docx'\nwith ZipFile\\(docx_path\\) as z:\n    xml_content = z.read\\('word/document.xml'\\)\n    tree = ElementTree.fromstring\\(xml_content\\)\n    ns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}\n    paragraphs = tree.findall\\('.//w:p', ns\\)\n    for p in paragraphs:\n        texts = [t.text for t in p.findall\\('.//w:t', ns\\) if t.text]\n        if texts:\n            print\\(''.join\\(texts\\)\\)\n\" 2>&1)",
+      "Bash(cd:*、)"
+    ]
+  }
+}
