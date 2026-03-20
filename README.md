@@ -39,13 +39,15 @@ Tomato Hunter 是一款游戏化番茄钟效率工具。你的每一个拖延任
 
 ## 📥 下载安装
 
-前往 [Releases](https://github.com/ZenanDOU/tomato_hunter/releases) 下载最新版本：
+[![Latest Release](https://img.shields.io/github/v/release/ZenanDOU/tomato_hunter?include_prereleases&label=latest&color=EE4433)](https://github.com/ZenanDOU/tomato_hunter/releases/latest)
 
-| 平台 | 文件 | 说明 |
-|------|------|------|
-| Windows | `.msi` | 双击安装。首次运行可能弹出 SmartScreen 警告，点击"更多信息" → "仍要运行" |
-| macOS (Apple Silicon) | `aarch64.dmg` | 拖入 Applications。首次打开右键 → 打开，或在系统设置 → 隐私与安全中允许 |
-| macOS (Intel) | `x64.dmg` | 同上 |
+👉 **[前往下载页面](https://github.com/ZenanDOU/tomato_hunter/releases/latest)**
+
+| 平台 | 下载 | 安装说明 |
+|------|------|---------|
+| Windows | [📦 .msi 安装包](https://github.com/ZenanDOU/tomato_hunter/releases/latest) | 双击安装。首次运行可能弹出 SmartScreen 警告，点击"更多信息" → "仍要运行" |
+| macOS (Apple Silicon) | [📦 aarch64.dmg](https://github.com/ZenanDOU/tomato_hunter/releases/latest) | 拖入 Applications。首次打开右键 → 打开，或在系统设置 → 隐私与安全中允许 |
+| macOS (Intel) | [📦 x64.dmg](https://github.com/ZenanDOU/tomato_hunter/releases/latest) | 同上 |
 
 > ⚠️ 当前为内测版本，未进行代码签名，系统可能会提示安全警告，这是正常的。
 
