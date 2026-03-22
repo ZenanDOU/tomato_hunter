@@ -1,26 +1,19 @@
-import type { TaskCategory, TaskDifficulty } from "../types";
-
-export interface SpriteData {
-  width: number;
-  height: number;
-  pixels: string;    // each char maps to palette index
-  palette: string[]; // colors
-}
+import type { TaskCategory, TaskDifficulty, SpriteData, LegacySpriteData } from "../types";
 
 export interface MonsterSpecies {
   id: string;
-  name: string;           // species name like "齿轮虫"
-  family: string;         // habitat family like "机械虫群"
-  habitat: string;        // habitat description
-  category: TaskCategory; // work/study/creative/life/other
-  tier: "prey" | "predator" | "apex";  // food chain position
-  difficulties: TaskDifficulty[];      // prey=simple/medium, predator=hard/epic, apex=legendary
+  name: string;
+  family: string;
+  habitat: string;
+  category: TaskCategory;
+  tier: "prey" | "predator" | "apex";
+  difficulties: TaskDifficulty[];
   emoji: string;
-  traits: { icon: string; name: string; desc: string }[];  // fixed species traits
+  traits: { icon: string; name: string; desc: string }[];
   bodyParts: { key: string; icon: string; label: string; hint: string }[];
   descTemplates: string[];
-  visualDesc: string;     // pixel art visual description
-  spriteData?: SpriteData; // optional pixel data (added later)
+  visualDesc: string;
+  spriteData?: SpriteData | LegacySpriteData;
 }
 
 const PROCRASTINATION_ADJECTIVES = [
@@ -34,7 +27,7 @@ export const BESTIARY: MonsterSpecies[] = [
   {
     id: "work-gear-bug",
     name: "齿轮虫",
-    family: "机械虫群",
+    family: "锈蚀机械兽",
     habitat: "齿轮工坊废墟",
     category: "work",
     tier: "prey",
@@ -57,7 +50,7 @@ export const BESTIARY: MonsterSpecies[] = [
   {
     id: "work-iron-centipede",
     name: "铁甲蜈蚣",
-    family: "机械虫群",
+    family: "锈蚀机械兽",
     habitat: "齿轮工坊废墟",
     category: "work",
     tier: "predator",
@@ -81,7 +74,7 @@ export const BESTIARY: MonsterSpecies[] = [
   {
     id: "work-forge-python",
     name: "锻炉蟒",
-    family: "机械虫群",
+    family: "锈蚀机械兽",
     habitat: "齿轮工坊废墟",
     category: "work",
     tier: "apex",
@@ -107,7 +100,7 @@ export const BESTIARY: MonsterSpecies[] = [
   {
     id: "creative-ink-bug",
     name: "墨点虫",
-    family: "画廊虫群",
+    family: "枯彩幻灵",
     habitat: "枯竭画廊",
     category: "creative",
     tier: "prey",
@@ -130,7 +123,7 @@ export const BESTIARY: MonsterSpecies[] = [
   {
     id: "creative-muse-moth",
     name: "灵感蛾",
-    family: "画廊虫群",
+    family: "枯彩幻灵",
     habitat: "枯竭画廊",
     category: "creative",
     tier: "predator",
@@ -152,35 +145,35 @@ export const BESTIARY: MonsterSpecies[] = [
     visualDesc: "翅膀泛着荧光的大蛾，被创意之光吸引的夜行者",
   },
   {
-    id: "creative-canvas-dragon",
-    name: "画境龙",
-    family: "画廊虫群",
+    id: "creative-canvas-phoenix",
+    name: "画境凤",
+    family: "枯彩幻灵",
     habitat: "枯竭画廊",
     category: "creative",
     tier: "apex",
     difficulties: ["legendary"],
-    emoji: "🐲",
+    emoji: "🔥",
     traits: [
-      { icon: "🌈", name: "幻象", desc: "自我怀疑" },
       { icon: "🔥", name: "焚稿", desc: "推倒重来" },
+      { icon: "🌈", name: "涅槃", desc: "完美主义的无限循环" },
     ],
     bodyParts: [
-      { key: "head", icon: "🐲", label: "龙首", hint: "构思设计" },
-      { key: "wings", icon: "🪽", label: "龙翼", hint: "主体创作" },
-      { key: "tail", icon: "💎", label: "龙尾", hint: "精修打磨" },
+      { key: "crest", icon: "👑", label: "凤冠", hint: "构思设计" },
+      { key: "wings", icon: "🔥", label: "焰翼", hint: "主体创作" },
+      { key: "tail", icon: "🪶", label: "尾羽", hint: "精修打磨" },
     ],
     descTemplates: [
       "这只{adj}{name}栖息在{habitat}，用{trait_desc}困住了{task}中的番茄",
-      "传说中的{adj}{name}从{task}的废弃画作中苏醒，幻象与焚稿之火吞噬着番茄",
+      "传说中的{adj}{name}从{task}的废弃画作中涅槃重生，焚稿之火与完美主义的执念吞噬着番茄",
     ],
-    visualDesc: "从废弃画作中浮现的龙形存在，身体由褪色的颜料构成",
+    visualDesc: "从废弃画作中燃起的火鸟，身体由褪色颜料和火焰构成，尾羽散落着颜料碎片",
   },
 
   // ========== 遗忘图书馆 (study) ==========
   {
     id: "study-book-louse",
     name: "书虱",
-    family: "图书馆虫群",
+    family: "蛀典书灵",
     habitat: "遗忘图书馆",
     category: "study",
     tier: "prey",
@@ -203,7 +196,7 @@ export const BESTIARY: MonsterSpecies[] = [
   {
     id: "study-thesis-wolf",
     name: "论文狼",
-    family: "图书馆虫群",
+    family: "蛀典书灵",
     habitat: "遗忘图书馆",
     category: "study",
     tier: "predator",
@@ -225,35 +218,35 @@ export const BESTIARY: MonsterSpecies[] = [
     visualDesc: "灰色的群居狼，毛发间夹带着论文碎片",
   },
   {
-    id: "study-knowledge-dragon",
-    name: "知识龙",
-    family: "图书馆虫群",
+    id: "study-archive-owl",
+    name: "封典巨鸮",
+    family: "蛀典书灵",
     habitat: "遗忘图书馆",
     category: "study",
     tier: "apex",
     difficulties: ["legendary"],
-    emoji: "🐉",
+    emoji: "🦉",
     traits: [
-      { icon: "🐉", name: "威压", desc: "畏难情绪" },
+      { icon: "🦉", name: "凝视", desc: "畏难情绪" },
       { icon: "📚", name: "封印", desc: "知识壁垒" },
     ],
     bodyParts: [
-      { key: "horns", icon: "🐉", label: "龙角", hint: "研究框架" },
-      { key: "wings", icon: "🪽", label: "龙翼", hint: "深度钻研" },
-      { key: "orb", icon: "💎", label: "龙珠", hint: "知识凝练" },
+      { key: "eyes", icon: "🦉", label: "鸮目", hint: "研究框架" },
+      { key: "wings", icon: "📖", label: "书翼", hint: "深度钻研" },
+      { key: "talons", icon: "🔒", label: "封爪", hint: "知识凝练" },
     ],
     descTemplates: [
       "这只{adj}{name}栖息在{habitat}，用{trait_desc}困住了{task}中的番茄",
-      "传说中的{adj}{name}盘踞在{task}的禁书区，知识壁垒与畏难情绪封印着番茄",
+      "传说中的{adj}{name}盘踞在{task}的禁书区，凝视的威压与知识壁垒封印着番茄",
     ],
-    visualDesc: "远古龙形守护者，身体由书页和知识符文构成",
+    visualDesc: "远古巨型猫头鹰守护者，羽翼由书页和知识符文构成，双目散发冷光",
   },
 
   // ========== 荒废花园 (life) ==========
   {
     id: "life-weed-mouse",
     name: "杂草鼠",
-    family: "花园生物群",
+    family: "荒野蔓生兽",
     habitat: "荒废花园",
     category: "life",
     tier: "prey",
@@ -276,7 +269,7 @@ export const BESTIARY: MonsterSpecies[] = [
   {
     id: "life-vine-frog",
     name: "藤蔓蛙",
-    family: "花园生物群",
+    family: "荒野蔓生兽",
     habitat: "荒废花园",
     category: "life",
     tier: "predator",
@@ -300,7 +293,7 @@ export const BESTIARY: MonsterSpecies[] = [
   {
     id: "life-ancient-bear",
     name: "古树熊",
-    family: "花园生物群",
+    family: "荒野蔓生兽",
     habitat: "荒废花园",
     category: "life",
     tier: "apex",
@@ -326,7 +319,7 @@ export const BESTIARY: MonsterSpecies[] = [
   {
     id: "other-mist-bug",
     name: "迷雾虫",
-    family: "沼泽虫群",
+    family: "迷雾幻形体",
     habitat: "迷雾沼泽",
     category: "other",
     tier: "prey",
@@ -349,7 +342,7 @@ export const BESTIARY: MonsterSpecies[] = [
   {
     id: "other-void-crow",
     name: "虚空鸦",
-    family: "沼泽虫群",
+    family: "迷雾幻形体",
     habitat: "迷雾沼泽",
     category: "other",
     tier: "predator",
@@ -371,28 +364,28 @@ export const BESTIARY: MonsterSpecies[] = [
     visualDesc: "暗影飞行者，漆黑的羽翼穿行于迷雾之间",
   },
   {
-    id: "other-chaos-dragon",
-    name: "混沌龙",
-    family: "沼泽虫群",
+    id: "other-abyss-jellyfish",
+    name: "深渊水母",
+    family: "迷雾幻形体",
     habitat: "迷雾沼泽",
     category: "other",
     tier: "apex",
     difficulties: ["legendary"],
-    emoji: "🐲",
+    emoji: "🪼",
     traits: [
-      { icon: "🌀", name: "混沌", desc: "完全失控" },
-      { icon: "🔮", name: "扭曲", desc: "认知偏差" },
+      { icon: "🪼", name: "缠绕", desc: "完全失控" },
+      { icon: "🌀", name: "扭曲", desc: "认知偏差" },
     ],
     bodyParts: [
-      { key: "head", icon: "🐲", label: "龙首", hint: "理清方向" },
-      { key: "core", icon: "🌀", label: "混沌核", hint: "核心攻坚" },
-      { key: "tail", icon: "🔮", label: "龙尾", hint: "凝聚成果" },
+      { key: "bell", icon: "🪼", label: "伞盖", hint: "理清方向" },
+      { key: "core", icon: "🌀", label: "核心", hint: "核心攻坚" },
+      { key: "tentacles", icon: "🫧", label: "触须", hint: "凝聚成果" },
     ],
     descTemplates: [
       "这只{adj}{name}栖息在{habitat}，用{trait_desc}困住了{task}中的番茄",
-      "传说中的{adj}{name}是{task}迷雾的源头，混沌与扭曲吞噬着所有番茄",
+      "传说中的{adj}{name}是{task}迷雾的源头，缠绕的触须与扭曲的光吞噬着所有番茄",
     ],
-    visualDesc: "迷雾的源头，混沌的化身，身体由漩涡和扭曲的光构成",
+    visualDesc: "迷雾深处的半透明巨型水母，伞盖由漩涡构成，触须散发扭曲的光",
   },
 ];
 

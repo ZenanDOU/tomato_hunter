@@ -18,23 +18,29 @@
   --color-grass: #5BBF47;
   --color-tomato: #EE4433;
   --color-sunny: #FFD93D;
-  --color-cloud: #FFFFFF;
+  --color-cloud: #DDEEFF;
   --color-pixel-black: #333333;
   --color-orange: #FF8844;
   --color-cream: #FFF8E8;
   --color-deep-blue: #3366AA;
   --color-pink: #FFCCDD;
   --color-mint: #88DDAA;
-  --color-light-blue: #DDEEFF;
 
   /* 怪物/战斗专用 */
   --color-monster-bg: #443355;
   --color-monster-border: #333333;
 
-  /* 向后兼容映射 */
-  --color-village-bg: #55BBEE;
-  --color-village-warm: #FFF8E8;
-  --color-village-header: #55BBEE;
+  /* 像素对齐间距 token */
+  --space-xs: 2px;
+  --space-sm: 4px;
+  --space-md: 8px;
+  --space-lg: 12px;
+  --space-xl: 16px;
+
+  /* 动效 token */
+  --transition-fast: 150ms;
+  --transition-normal: 200ms;
+  --transition-slow: 300ms;
 }
 
 /* 像素描边系统 — 番茄列车规范 */
@@ -106,4 +112,165 @@ html.hunt-window body {
 .pixelated {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+}
+
+/* ===== Pixel Animation System ===== */
+
+/* Scanline slide-in for tab switches */
+@keyframes pixel-slide-in {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+.pixel-slide-in {
+  animation: pixel-slide-in 100ms steps(4) forwards;
+}
+
+/* White flash for phase transitions */
+@keyframes pixel-flash {
+  0% { opacity: 1; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.pixel-flash {
+  position: fixed;
+  inset: 0;
+  background: white;
+  z-index: 9999;
+  pointer-events: none;
+  animation: pixel-flash 80ms steps(2) forwards;
+}
+
+/* Hit shake for monster sprites */
+@keyframes pixel-hit-shake {
+  0% { transform: translateX(0); filter: brightness(3); }
+  16% { transform: translateX(-2px); filter: brightness(1); }
+  33% { transform: translateX(2px); filter: brightness(3); }
+  50% { transform: translateX(-2px); filter: brightness(1); }
+  66% { transform: translateX(2px); filter: brightness(3); }
+  83% { transform: translateX(-2px); filter: brightness(1); }
+  100% { transform: translateX(0); filter: brightness(1); }
+}
+.pixel-hit {
+  animation: pixel-hit-shake 200ms steps(1) forwards;
+}
+
+/* Loot drop entrance */
+@keyframes pixel-loot-enter {
+  from { transform: translateY(8px) scale(1.2); opacity: 0; }
+  33% { transform: translateY(4px) scale(1.1); opacity: 0.5; }
+  66% { transform: translateY(0) scale(1.0); opacity: 1; }
+  to { transform: translateY(0) scale(1.0); opacity: 1; }
+}
+.pixel-loot-enter {
+  animation: pixel-loot-enter 200ms steps(4) forwards;
+}
+
+/* Button click flash */
+@keyframes pixel-button-flash {
+  0% { box-shadow: inset 0 0 0 100px rgba(255,255,255,0.5); }
+  100% { box-shadow: inset 0 0 0 100px rgba(255,255,255,0); }
+}
+
+/* Pixel pulse (replaces animate-pulse cubic-bezier) */
+@keyframes pixel-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+.pixel-pulse {
+  animation: pixel-pulse 1s steps(2) infinite;
+}
+
+/* Defeat fade for killed monsters */
+@keyframes pixel-defeat-fade {
+  0% { opacity: 1; filter: brightness(1); }
+  25% { opacity: 1; filter: brightness(3); }
+  50% { opacity: 0.6; filter: brightness(1); }
+  75% { opacity: 0.3; filter: brightness(3); }
+  100% { opacity: 0.1; filter: brightness(1); }
+}
+.pixel-defeat-fade {
+  animation: pixel-defeat-fade 800ms steps(4) forwards;
+}
+
+/* Sparkle particles for celebration */
+@keyframes pixel-sparkle {
+  0% { opacity: 0; transform: scale(0.5); }
+  25% { opacity: 1; transform: scale(1.2); }
+  50% { opacity: 1; transform: scale(1); }
+  75% { opacity: 0.5; transform: scale(0.8); }
+  100% { opacity: 0; transform: scale(0.3); }
+}
+.pixel-sparkle {
+  animation: pixel-sparkle 1.2s steps(4) forwards;
+}
+
+/* Pulsing border for active hunt tasks */
+@keyframes pixel-border-pulse {
+  0% { box-shadow: 0 0 0 2px #FF6B6B; }
+  50% { box-shadow: 0 0 0 2px transparent; }
+  100% { box-shadow: 0 0 0 2px #FF6B6B; }
+}
+.pixel-border-pulse {
+  animation: pixel-border-pulse 1.5s steps(2) infinite;
+}
+
+/* Farm watering animation */
+@keyframes farm-water-drop {
+  0% { transform: translateY(-20px); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(20px); opacity: 0; }
+}
+.water-drops {
+  animation: farm-water-drop 1.5s ease-out;
+}
+
+/* Farm fertilizer glow */
+.farm-glow {
+  box-shadow: inset 0 0 20px rgba(234, 179, 8, 0.3);
+  transition: box-shadow 0.3s;
+}
+
+/* Rest progress bar breathing */
+@keyframes rest-breath {
+  0% { opacity: 1; }
+  50% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+.rest-breath {
+  animation: rest-breath 2s steps(2) infinite;
+}
+
+/* Rest scene color cycle */
+@keyframes rest-color-cycle {
+  0% { background-color: rgba(136, 221, 170, 0.15); }
+  50% { background-color: rgba(221, 238, 255, 0.15); }
+  100% { background-color: rgba(136, 221, 170, 0.15); }
+}
+.rest-color-cycle {
+  animation: rest-color-cycle 8s steps(4) infinite;
+}
+
+/* Scanline enter (content area transition) */
+@keyframes scanline-enter {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.scanline-enter {
+  animation: scanline-enter var(--transition-normal, 200ms) steps(8) forwards;
+}
+
+/* Slide-down expand for collapsible sections */
+@keyframes slide-down {
+  from { max-height: 0; opacity: 0; overflow: hidden; }
+  to { max-height: var(--expand-height, 500px); opacity: 1; overflow: hidden; }
+}
+.slide-down-enter {
+  animation: slide-down var(--transition-normal, 200ms) ease-out forwards;
+}
+
+/* Unified pixel focus state */
+*:focus-visible {
+  outline: 2px solid #FFD93D !important;
+  outline-offset: 1px !important;
 }

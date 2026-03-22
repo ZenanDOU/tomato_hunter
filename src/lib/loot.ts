@@ -20,13 +20,16 @@ const CATEGORY_MATERIAL: Record<
 export function generateLoot(
   category: TaskCategory,
   consecutiveCount: number,
-  bonusMultiplier: number = 1
+  bonusMultiplier: number = 1,
+  tomatoCount: number = 1
 ): { materialId: number; quantity: number }[] {
   const drops: { materialId: number; quantity: number }[] = [];
   const pool = CATEGORY_MATERIAL[category];
 
-  // Guaranteed rescued tomato drop
-  drops.push({ materialId: 11, quantity: 1 });
+  // Rescued tomato drop (variable: sword=1, hammer=1-2, dagger=ceil(actions/2))
+  if (tomatoCount > 0) {
+    drops.push({ materialId: 11, quantity: tomatoCount });
+  }
 
   // Guaranteed common drop
   const commonQty = Math.ceil(
@@ -52,11 +55,54 @@ export function generateLoot(
   return drops;
 }
 
+// Rare material IDs (6-10)
+const RARE_MATERIAL_IDS = new Set([6, 7, 8, 9, 10]);
+
+async function checkAndUnlockRecipes(
+  drops: { materialId: number; quantity: number }[]
+): Promise<string[]> {
+  const db = await getDb();
+  const unlockedNames: string[] = [];
+
+  for (const drop of drops) {
+    if (!RARE_MATERIAL_IDS.has(drop.materialId)) continue;
+
+    // Check if player had 0 of this material before this drop
+    const rows = await db.select<{ quantity: number }[]>(
+      "SELECT quantity FROM player_materials WHERE material_id = $1",
+      [drop.materialId]
+    );
+    const prevQty = rows[0]?.quantity ?? 0;
+    if (prevQty > 0) continue;
+
+    // Unlock equipment whose recipe includes this material
+    const equipRows = await db.select<{ id: number; name: string }[]>(
+      `SELECT id, name FROM equipment
+       WHERE unlocked = 0 AND recipe LIKE $1`,
+      [`%"${drop.materialId}"%`]
+    );
+
+    for (const equip of equipRows) {
+      await db.execute(
+        "UPDATE equipment SET unlocked = 1 WHERE id = $1",
+        [equip.id]
+      );
+      unlockedNames.push(equip.name);
+    }
+  }
+
+  return unlockedNames;
+}
+
 export async function applyLoot(
   pomodoroId: number,
   drops: { materialId: number; quantity: number }[]
-): Promise<void> {
+): Promise<string[]> {
   const db = await getDb();
+
+  // Check for recipe unlocks BEFORE updating quantities
+  const unlockedNames = await checkAndUnlockRecipes(drops);
+
   for (const drop of drops) {
     await db.execute(
       "INSERT INTO loot_drops (pomodoro_id, material_id, quantity) VALUES ($1, $2, $3)",
@@ -68,4 +114,6 @@ export async function applyLoot(
       [drop.materialId, drop.quantity]
     );
   }
+
+  return unlockedNames;
 }

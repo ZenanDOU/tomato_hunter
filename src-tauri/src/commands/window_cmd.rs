@@ -23,8 +23,15 @@ pub async fn open_hunt_window(app: AppHandle) -> Result<(), String> {
     let app_clone = app.clone();
     window.on_window_event(move |event| {
         if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-            api.prevent_close();
-            let _ = app_clone.emit("hunt_window_close_requested", &());
+            match app_clone.emit("hunt_window_close_requested", &()) {
+                Ok(_) => {
+                    api.prevent_close();
+                }
+                Err(e) => {
+                    eprintln!("[window] failed to emit close event, allowing close: {}", e);
+                    // Don't prevent close — let the window close as fallback
+                }
+            }
         }
     });
 

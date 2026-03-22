@@ -18,7 +18,28 @@
       "Bash(python3:*)",
       "Bash(python:*)",
       "Bash(PYTHONIOENCODING=utf-8 python -c \"\nfrom zipfile import ZipFile\nfrom xml.etree import ElementTree\nimport sys\nsys.stdout.reconfigure\\(encoding='utf-8'\\)\n\ndocx_path = 'D:/AI_auto/tomato_hunter/docs/番茄列车_游戏设计规范文档.docx'\nwith ZipFile\\(docx_path\\) as z:\n    xml_content = z.read\\('word/document.xml'\\)\n    tree = ElementTree.fromstring\\(xml_content\\)\n    ns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}\n    paragraphs = tree.findall\\('.//w:p', ns\\)\n    for p in paragraphs:\n        texts = [t.text for t in p.findall\\('.//w:t', ns\\) if t.text]\n        if texts:\n            print\\(''.join\\(texts\\)\\)\n\" 2>&1)",
-      "Bash(cd:*、)"
+      "Bash(find:*)",
+      "Bash(npx openspec:*)",
+      "Bash(printf:*)",
+      "Bash(npx tsc:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(npm run:*)",
+      "Bash(cd src-tauri:*)",
+      "Read(//d/AI_auto/tomato_hunter/$APPDATA/**)",
+      "Read(//d/AI_auto/tomato_hunter/$HOME/.local/share/**)",
+      "Bash(sqlite3:*)",
+      "Bash(where sqlite3.exe)",
+      "Read(//c/tools/**)",
+      "Read(//c/ProgramData/chocolatey/bin/**)",
+      "Bash(pip show:*)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "Read(//d/AI_auto/tomato_hunter/**)",
+      "Read(//c/Users/DOU/AppData/**)",
+      "Bash(node:*)",
+      "Bash(taskkill:*)",
+      "Bash(tasklist:*)",
+      "Read(//d/AI_auto/tomato_hunter/$LOCALAPPDATA/**)"
     ]
   }
 }

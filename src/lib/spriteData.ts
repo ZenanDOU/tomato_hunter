@@ -1,11 +1,11 @@
-import type { SpriteData } from "../components/common/PixelSprite";
+import type { LegacySpriteData } from "../types";
 
 // Each sprite is 16x16 = 256 characters.
 // '0' = transparent, other digits map to palette indices.
 
 // 1. 齿轮虫 (gear-bug) - work-gear-beast
 // A small mechanical beetle with gear-tooth edges
-const gearBug: SpriteData = {
+const gearBug: LegacySpriteData = {
   width: 16,
   height: 16,
   palette: [
@@ -53,7 +53,7 @@ const gearBug: SpriteData = {
 
 // 2. 灵感蛾 (muse-moth) - creative-muse-butterfly
 // A moth with spread wings
-const museMoth: SpriteData = {
+const museMoth: LegacySpriteData = {
   width: 16,
   height: 16,
   palette: [
@@ -101,7 +101,7 @@ const museMoth: SpriteData = {
 
 // 3. 论文狼 (thesis-wolf) - study-thesis-wolf
 // A wolf head/upper body facing forward
-const thesisWolf: SpriteData = {
+const thesisWolf: LegacySpriteData = {
   width: 16,
   height: 16,
   palette: [
@@ -150,7 +150,7 @@ const thesisWolf: SpriteData = {
 
 // 4. 藤蔓蛙 (vine-frog) - life-storage-frog
 // A frog with vine patterns
-const vineFrog: SpriteData = {
+const vineFrog: LegacySpriteData = {
   width: 16,
   height: 16,
   palette: [
@@ -198,7 +198,7 @@ const vineFrog: SpriteData = {
 
 // 5. 虚空鸦 (void-crow) - other-mist-crow
 // A dark bird with glowing eyes
-const voidCrow: SpriteData = {
+const voidCrow: LegacySpriteData = {
   width: 16,
   height: 16,
   palette: [
@@ -244,11 +244,27 @@ const voidCrow: SpriteData = {
     "0000011011000000",
 };
 
-// Export sprite data keyed by species ID
-export const SPRITE_DATA: Record<string, SpriteData> = {
+// Legacy 16x16 sprite data
+export const SPRITE_DATA_LEGACY: Record<string, LegacySpriteData> = {
   "work-gear-bug": gearBug,
   "creative-muse-moth": museMoth,
   "study-thesis-wolf": thesisWolf,
   "life-vine-frog": vineFrog,
   "other-void-crow": voidCrow,
+};
+
+import type { SpriteData } from "../types";
+import { SPRITE_DATA_32 } from "./spriteData32";
+
+/**
+ * Get sprite data for a species, preferring 32x32 over legacy 16x16.
+ */
+export function getSpriteData(speciesId: string): SpriteData | LegacySpriteData | undefined {
+  return SPRITE_DATA_32[speciesId] ?? SPRITE_DATA_LEGACY[speciesId];
+}
+
+// Backward compat: SPRITE_DATA now returns either format
+export const SPRITE_DATA: Record<string, SpriteData | LegacySpriteData> = {
+  ...SPRITE_DATA_LEGACY,
+  ...SPRITE_DATA_32,
 };

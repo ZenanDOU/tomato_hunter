@@ -6,6 +6,7 @@ export const startTimer = (params: {
   taskId: number;
   taskName: string;
   pomodoroId?: number;
+  timerMode?: string;
   focusMinutes?: number;
   breakMinutes?: number;
   longBreakMinutes?: number;
@@ -21,17 +22,29 @@ export const advanceTimerPhase = () =>
   invoke<TimerState>("advance_timer_phase");
 export const getTimerState = () => invoke<TimerState>("get_timer_state");
 
+// Dagger mode
+export const daggerChoose = (action: boolean) =>
+  invoke<TimerState>("dagger_choose", { action });
+
+// Consumable timer modifiers
+export const extendFocus = (extraMinutes: number) =>
+  invoke<TimerState>("extend_focus", { extraMinutes });
+export const extendBreak = (extraMinutes: number) =>
+  invoke<TimerState>("extend_break", { extraMinutes });
+export const shortenFocus = (reduceMinutes: number) =>
+  invoke<TimerState>("shorten_focus", { reduceMinutes });
+export const skipPrep = () => invoke<TimerState>("skip_prep");
+export const skipReview = () => invoke<TimerState>("skip_review");
+
 // Window commands
 export const openHuntWindow = () => invoke("open_hunt_window");
 export const closeHuntWindow = () => invoke("close_hunt_window");
 export const resizeHuntWindow = async (width: number, height: number) => {
   try {
-    // Use Tauri window API directly for more reliable resizing
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
     const win = getCurrentWindow();
     await win.setSize(new (await import("@tauri-apps/api/dpi")).LogicalSize(width, height));
   } catch {
-    // Fallback to custom command
     await invoke("resize_hunt_window", { width, height });
   }
 };

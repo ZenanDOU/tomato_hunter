@@ -1,46 +1,86 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTimerStore } from "./stores/timerStore";
-import { useTaskStore } from "./stores/taskStore";
-import { usePlanStore } from "./stores/planStore";
+import { useSettingsStore } from "./stores/settingsStore";
+import { useFarmStore } from "./stores/farmStore";
 import { useInventoryStore } from "./stores/inventoryStore";
+import { useTaskStore } from "./stores/taskStore";
 import { useTauriEvent } from "./hooks/useTauriEvent";
-import { generateLoot, applyLoot } from "./lib/loot";
-import { getDb } from "./lib/db";
+import { useHuntAudio } from "./hooks/useHuntAudio";
+import { useReviewFlow } from "./hooks/useReviewFlow";
 import { closeHuntWindow, resizeHuntWindow } from "./lib/commands";
-import type { TimerState, TaskCategory, ReflectionType } from "./types";
+import { emit } from "@tauri-apps/api/event";
+import { audioManager } from "./lib/audio";
+import type { TimerState } from "./types";
 import { PrepPhase } from "./components/hunt/PrepPhase";
 import { FocusPhase } from "./components/hunt/FocusPhase";
 import { ReviewPhase } from "./components/hunt/ReviewPhase";
+import { DaggerChoicePhase } from "./components/hunt/DaggerChoicePhase";
 import { Settlement } from "./components/settlement/Settlement";
 import { RestScreen } from "./components/settlement/RestScreen";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 
 type FlowPhase = "hunting" | "settlement" | "rest";
 
 export function HuntApp() {
-  const { timer, setTimer, advancePhase } = useTimerStore();
-  const { damageTask } = useTaskStore();
-  const { incrementCompleted } = usePlanStore();
+  const timer = useTimerStore((s) => s.timer);
+  const setTimer = useTimerStore((s) => s.setTimer);
   const [flowPhase, setFlowPhase] = useState<FlowPhase>("hunting");
-  const [drops, setDrops] = useState<
-    { materialId: number; quantity: number }[]
-  >([]);
   const [strategyNote, setStrategyNote] = useState("");
-  const reviewInProgress = useRef(false);
+  const lastEssenceTick = useRef(0); // track last minute we awarded essence
+
+  const handleTickAudio = useHuntAudio();
+  const { handleReviewComplete, drops, hpReachedZero, unlockedRecipes, showFirstKillReward } = useReviewFlow(timer, setFlowPhase);
+
+  useKeyboardShortcuts({
+    onSpace: timer.phase === "focus" ? () => {
+      const store = useTimerStore.getState();
+      if (store.timer.is_paused) store.resume();
+      else store.pause();
+    } : undefined,
+  });
+
+  // Initialize stores in hunt window (audio init is handled by useHuntAudio)
+  useEffect(() => {
+    useSettingsStore.getState().fetchSettings();
+    useFarmStore.getState().fetchFarm();
+    useInventoryStore.getState().fetchAll();
+    useTaskStore.getState().fetchTasks();
+  }, []);
 
   const handleTick = useCallback(
-    (payload: TimerState) => setTimer(payload),
-    [setTimer]
+    (payload: TimerState) => {
+      // Tomato essence production: every 60 seconds of focus
+      if (payload.phase === "focus") {
+        const elapsed = payload.total_seconds - payload.remaining_seconds;
+        const currentMinute = Math.floor(elapsed / 60);
+        if (currentMinute > lastEssenceTick.current) {
+          const minutesDelta = currentMinute - lastEssenceTick.current;
+          lastEssenceTick.current = currentMinute;
+          useFarmStore.getState().tickProduction(minutesDelta);
+        }
+      } else {
+        lastEssenceTick.current = 0;
+      }
+
+      // Audio transitions (countdown, armor enter/exit, phase SFX)
+      handleTickAudio(payload);
+
+      setTimer(payload);
+    },
+    [setTimer, handleTickAudio]
   );
   useTauriEvent("timer_tick", handleTick);
 
   // Handle window close request (pause or retreat)
   const handleWindowClose = useCallback(async () => {
     const inv = useInventoryStore.getState();
+    // Smoke bomb is now equipment ID 7
     const hasSmokeBomb = inv.ownedEquipment.some(
-      (e) => e.equipment.id === 6 && e.quantity > 0
+      (e) => e.equipment.id === 7 && e.quantity > 0
     );
     if (hasSmokeBomb) {
-      await inv.useConsumable(6);
+      await inv.useConsumable(7);
       await useTimerStore.getState().pause();
     } else {
       await useTimerStore.getState().retreat();
@@ -55,90 +95,59 @@ export function HuntApp() {
   }, []);
   useTauriEvent("pause_timeout_retreat", handlePauseTimeout);
 
-  const handleReviewComplete = async (
-    note: string,
-    reflType: ReflectionType | null,
-    reflText: string
-  ) => {
-    // Prevent double-submission
-    if (reviewInProgress.current) return;
-    if (!timer.task_id || !timer.pomodoro_id) return;
-    reviewInProgress.current = true;
-
-    try {
-      const db = await getDb();
-
-      // Get current loadout for snapshot
-      const loadoutRows = await db.select<
-        {
-          weapon_id: number | null;
-          armor_id: number | null;
-          items: string;
-        }[]
-      >("SELECT * FROM loadout WHERE id = 1");
-      const loadoutJson = JSON.stringify(loadoutRows[0] || {});
-
-      // Update the pomodoro record (written at start with ended_at=NULL)
-      await db.execute(
-        `UPDATE pomodoros SET ended_at = $1, result = 'completed', completion_note = $2,
-         reflection_type = $3, reflection_text = $4, loadout_snapshot = $5
-         WHERE id = $6`,
-        [
-          new Date().toISOString(),
-          note,
-          reflType,
-          reflText,
-          loadoutJson,
-          timer.pomodoro_id,
-        ]
-      );
-
-      // Damage the monster
-      await damageTask(timer.task_id);
-      await incrementCompleted(timer.task_id);
-
-      // Generate loot
-      const taskRows = await db.select<{ category: TaskCategory }[]>(
-        "SELECT category FROM tasks WHERE id = $1",
-        [timer.task_id]
-      );
-      const category = taskRows[0]?.category || "other";
-      const lootDrops = generateLoot(category, timer.rounds_completed);
-      await applyLoot(timer.pomodoro_id, lootDrops);
-
-      setDrops(lootDrops);
-
-      // Advance timer to break phase
-      await advancePhase();
-      setFlowPhase("settlement");
-    } catch (err) {
-      console.error("Review complete error:", err);
-    } finally {
-      reviewInProgress.current = false;
+  const handleSettlementDone = async () => {
+    audioManager.playSfx("transition-out");
+    audioManager.leaveHabitat(true);
+    // Advance timer from review → break/idle NOW (not earlier during settlement)
+    await useTimerStore.getState().advancePhase();
+    // Hammer mode: no break phase, go straight to idle and close
+    if (timer.timer_mode === "hammer") {
+      audioManager.exitFocusAudio();
+      await emit("hunt_completed");
+      await closeHuntWindow();
+      return;
     }
-  };
-
-  const handleSettlementDone = () => {
+    audioManager.playSfx("break-start");
     setFlowPhase("rest");
   };
 
+  const handleStartNextHunt = useCallback(() => {
+    audioManager.playSfx("transition-in");
+    setFlowPhase("hunting");
+    setStrategyNote("");
+    lastEssenceTick.current = 0;
+  }, []);
+
   if (flowPhase === "settlement") {
-    return <Settlement drops={drops} onContinue={handleSettlementDone} />;
+    return <ErrorBoundary fallbackTitle="Hunt Error"><Settlement drops={drops} hpReachedZero={hpReachedZero} unlockedRecipes={unlockedRecipes} showFirstKillReward={showFirstKillReward} onContinue={handleSettlementDone} /></ErrorBoundary>;
   }
 
   if (flowPhase === "rest") {
-    // Show rest screen regardless of timer phase to prevent getting stuck
-    if (timer.phase === "break" || timer.phase === "long_break") {
-      return <RestScreen />;
-    }
-    // Fallback: if timer is in unexpected state, still allow returning to village
-    return <RestScreen />;
+    return <ErrorBoundary fallbackTitle="Hunt Error"><RestScreen onStartNextHunt={handleStartNextHunt} /></ErrorBoundary>;
   }
 
   // Hunting phases
   switch (timer.phase) {
+    case "awaiting_choice":
+      return <ErrorBoundary fallbackTitle="Hunt Error"><DaggerChoicePhase timer={timer} /></ErrorBoundary>;
+    case "dagger_rest":
+      return (
+        <ErrorBoundary fallbackTitle="Hunt Error">
+        <div className="bg-grass text-white p-5 min-h-screen flex flex-col items-center justify-center gap-4">
+          <div className="text-4xl">🌿</div>
+          <h2 className="pixel-title text-lg">休息中</h2>
+          <div className="text-3xl font-bold pixel-title">
+            {Math.floor(timer.remaining_seconds / 60)}:{String(timer.remaining_seconds % 60).padStart(2, "0")}
+          </div>
+          <p className="text-sm text-white/70">
+            已行动 {timer.dagger_action_count} 次 · {Math.ceil(timer.dagger_action_count / 2)} 🍅
+          </p>
+        </div>
+        </ErrorBoundary>
+      );
     case "prep":
       return (
+        <ErrorBoundary fallbackTitle="Hunt Error">
         <PrepPhase
           timer={timer}
           onStartBattle={async (note) => {
@@ -148,20 +157,24 @@ export function HuntApp() {
             } catch {}
           }}
         />
+        </ErrorBoundary>
       );
     case "focus":
-      return <FocusPhase timer={timer} strategyNote={strategyNote} />;
+      return <ErrorBoundary fallbackTitle="Hunt Error"><FocusPhase timer={timer} strategyNote={strategyNote} /></ErrorBoundary>;
     case "review":
-      // Resize window larger for review
       resizeHuntWindow(400, 520).catch(() => {});
       return (
+        <ErrorBoundary fallbackTitle="Hunt Error">
         <ReviewPhase timer={timer} onComplete={handleReviewComplete} />
+        </ErrorBoundary>
       );
     default:
       return (
-        <div className="bg-stone-900 text-stone-400 p-4">
+        <ErrorBoundary fallbackTitle="Hunt Error">
+        <div className="bg-pixel-black text-[#999999] p-4">
           等待狩猎开始...
         </div>
+        </ErrorBoundary>
       );
   }
 }

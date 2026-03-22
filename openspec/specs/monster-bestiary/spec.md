@@ -41,7 +41,7 @@ The system SHALL support clicking a monster card in the hunt list to expand an a
 - **THEN** the detail panel collapses back to the compact view
 
 ### Requirement: Monster sprite display
-The system SHALL display monster species visuals using enlarged emoji with CSS `image-rendering: pixelated` effect (`.monster-sprite` class). Each species maps to a specific emoji.
+The system SHALL display monster species visuals using `getSpriteData(speciesId)` to look up pixel sprite data from the centralized SPRITE_DATA map. When sprite data exists, the system MUST use the PixelSprite component to render animated pixel art. When no sprite data exists, the system MUST fall back to enlarged emoji with CSS `image-rendering: pixelated` effect (`.monster-sprite` class).
 
 #### Scenario: Monster sprite in discovery card
 - **WHEN** the discovery card is displayed
@@ -50,3 +50,49 @@ The system SHALL display monster species visuals using enlarged emoji with CSS `
 #### Scenario: Monster sprite in hunt list
 - **WHEN** a monster is shown in the hunt list
 - **THEN** the species emoji is displayed next to the monster name
+
+#### Scenario: Monster sprite in bestiary thumbnail
+- **WHEN** a discovered monster is displayed in the bestiary collection
+- **THEN** the system uses `getSpriteData(speciesId)` to look up the pixel sprite and renders it with PixelSprite at idle animation, scale=2
+
+#### Scenario: Monster sprite in bestiary detail
+- **WHEN** a discovered monster's detail panel is expanded in the bestiary
+- **THEN** the system uses `getSpriteData(speciesId)` to look up the pixel sprite and renders it with PixelSprite at idle animation, scale=3
+
+#### Scenario: Monster sprite fallback to emoji
+- **WHEN** a monster has no pixel sprite data in SPRITE_DATA
+- **THEN** the bestiary thumbnail and detail panel fall back to emoji display
+
+### Requirement: Bestiary collection view by family
+The system SHALL provide a bestiary collection view that organizes all 15 species by their 5 ecological families. Each family section shows the family name, habitat, and a row of 3 species (prey → predator → apex). This view is embedded within the hunter profile tab.
+
+#### Scenario: All families displayed
+- **WHEN** the bestiary collection view renders
+- **THEN** all 5 families are shown: 锈蚀机械兽, 枯彩幻灵, 蛀典书灵, 荒野蔓生兽, 迷雾幻形体
+
+#### Scenario: Species within family ordered by tier
+- **WHEN** a family section renders
+- **THEN** species are ordered left-to-right: prey (幼年), predator (成年), apex (王级)
+
+### Requirement: Species discovery state from task history
+The system SHALL determine species discovery state by querying tasks with status='killed' using the `species_id` column. A species is "discovered" if at least one task with matching `species_id` has been killed. First discovery date is the earliest `completed_at` among those tasks. The `species_id` column SHALL store the BESTIARY species ID (e.g., "work-gear-bug"), set during task identification via `selectSpecies()`.
+
+#### Scenario: Species discovered via killed task
+- **WHEN** a task with species_id="work-gear-bug" and status="killed" exists
+- **THEN** the species "齿轮虫" is marked as discovered in the bestiary
+
+#### Scenario: Species not discovered if only hunting
+- **WHEN** a task with species_id="work-gear-bug" exists but status is "hunting" (not killed)
+- **THEN** the species remains undiscovered in the bestiary
+
+#### Scenario: Kill count aggregation
+- **WHEN** multiple killed tasks share species_id="work-gear-bug"
+- **THEN** the bestiary shows the total count of killed tasks for that species
+
+#### Scenario: Species ID set during identification
+- **WHEN** a task is identified and discovery is confirmed
+- **THEN** the task's `species_id` column is set to the BESTIARY species ID returned by `selectSpecies(category, taskName, difficulty)`
+
+#### Scenario: Existing tasks backfill species_id
+- **WHEN** the app starts and there exist killed tasks with species_id IS NULL
+- **THEN** the system computes species_id from each task's category, name, and difficulty using `selectSpecies()` and updates the column

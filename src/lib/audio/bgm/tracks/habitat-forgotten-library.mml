@@ -1,0 +1,18 @@
+@title Forgotten Library
+@tempo 70
+
+; Section A — Mysterious, lydian, sustained tones with sparse melody
+CH1: v10 o4 l4 c f+ g b l2 > c < b l4 g f+ e d c2 r2 c f+ g b l2 > c1
+CH2: v7 o4 l2 r1 e b g f+ r1 e1
+CH3: v9 o3 l1 c g d a c g c1
+CH4: v2 l2 r1 c r1 c r1 c r1
+; Section B — Opening up, more movement
+CH1: v12 o4 l4 e f+ a b l2 > d c l4 < b a g f+ e4 d4 l2 c r l4 e f+ a b l2 > d1
+CH2: v8 o4 l2 r1 g > d < b a r1 g1
+CH3: v10 o3 l1 e b f+ > c < e b e1
+CH4: v3 l4 r2 c r r2 c r r2 c r r4 c4 r2
+; Section A' — Settling back, even more mysterious
+CH1: v9 o4 l4 c f+ g b l2 > c < b l1 g l4 f+ e d l2 c r l4 c f+ g b l1 > c1
+CH2: v6 o4 l2 r1 e b l1 g r1 e1
+CH3: v8 o3 l1 c g d a c g c1
+CH4: v2 l2 r1 r c r1 r c r1

@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { VillageLayout } from "./components/village/VillageLayout";
 import { RecoveryDialog } from "./components/common/RecoveryDialog";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
+import { useTauriEvent } from "./hooks/useTauriEvent";
 import type { Pomodoro } from "./types";
 import { getDb } from "./lib/db";
+import { audioManager } from "./lib/audio";
+import { useSettingsStore } from "./stores/settingsStore";
+import { useInventoryStore } from "./stores/inventoryStore";
+import { syncAfterHuntComplete } from "./lib/storeSync";
 
 export default function App() {
   const [recoveryPomodoro, setRecoveryPomodoro] = useState<Pomodoro | null>(
@@ -10,6 +16,16 @@ export default function App() {
   );
 
   useEffect(() => {
+    // Initialize audio system — main window auto-starts village BGM
+    audioManager.init({ autoPlayVillageBgm: true });
+    useSettingsStore.getState().fetchSettings().then(async () => {
+      const settings = useSettingsStore.getState();
+      if (!settings.starterItemsGranted && !settings.onboardingCompleted) {
+        await useInventoryStore.getState().grantItems([{ equipmentId: 10, quantity: 5 }]);
+        await settings.setStarterItemsGranted(true);
+      }
+    });
+
     (async () => {
       try {
         const db = await getDb();
@@ -25,6 +41,13 @@ export default function App() {
     })();
   }, []);
 
+  // Refresh stores when hunt window closes
+  useTauriEvent("hunt_completed", () => {
+    syncAfterHuntComplete();
+    // Clear stale recovery dialog if present
+    setRecoveryPomodoro(null);
+  });
+
   return (
     <>
       {recoveryPomodoro && (
@@ -33,7 +56,9 @@ export default function App() {
           onDismiss={() => setRecoveryPomodoro(null)}
         />
       )}
-      <VillageLayout />
+      <ErrorBoundary>
+        <VillageLayout />
+      </ErrorBoundary>
     </>
   );
 }

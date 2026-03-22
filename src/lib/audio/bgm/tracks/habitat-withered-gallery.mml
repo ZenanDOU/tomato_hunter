@@ -1,0 +1,18 @@
+@title Withered Gallery
+@tempo 80
+
+; Section A — Ethereal, melancholic, dorian arpeggios
+CH1: v11 o4 l8 d4 f a > c < a f d4 r4 e4 g b > d < b g e2 d4 f a > c2 < a4 f4 d2
+CH2: v7 o4 l4 r2 d f a f r2 e g b g r2 d f a2 d2
+CH3: v9 o3 l2 d a e b d a f1
+CH4: v3 l4 r2 r c r2 r c r2 r c r2 r c
+; Section B — More expressive, rising emotion
+CH1: v13 o4 l8 f4 a > c e c < a f4 r4 g4 b > d f d < b g2 f4 a > c e2 < l4 d f d2
+CH2: v8 o4 l4 r2 f a > c < a r2 g b > d < b r2 f a > c2 < f2
+CH3: v10 o3 l2 f > c < g > d < f > c < e b
+CH4: v4 l4 r2 c r r2 c r r2 c r r2 c r
+; Section A' — Return, softer, reflective
+CH1: v9 o4 l8 d4 f a > c < a f d4 r4 e4 g b > d < b g e2 l4 d f a > c < a f l2 d1
+CH2: v6 o4 l4 r2 d f a f r2 e g b g r1 r2 d f l2 d1
+CH3: v8 o3 l2 d a e b d a d1
+CH4: v2 l4 r2 r c r2 r c r1 r1 r2 r c

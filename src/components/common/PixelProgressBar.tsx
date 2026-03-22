@@ -6,9 +6,9 @@ interface PixelProgressBarProps {
 }
 
 const FILL_COLORS = {
-  tomato: "bg-[#EE4433]",
-  grass: "bg-[#5BBF47]",
-  orange: "bg-[#FF8844]",
+  tomato: "bg-tomato",
+  grass: "bg-grass",
+  orange: "bg-orange",
 };
 
 export function PixelProgressBar({
@@ -21,7 +21,7 @@ export function PixelProgressBar({
 
   return (
     <div
-      className={`h-4 bg-white outline-2 outline-[#333333] outline-offset-[-2px] ${className}`}
+      className={`h-4 bg-white outline-2 outline-pixel-black outline-offset-[-2px] ${className}`}
     >
       <div
         className={`h-full ${FILL_COLORS[color]}`}

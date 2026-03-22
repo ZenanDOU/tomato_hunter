@@ -45,20 +45,22 @@ export function TaskForm({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="bg-white rounded p-4 pixel-border flex flex-col gap-3">
-      <h3 className="font-bold text-sm text-[#333333]">📝 发现新怪物</h3>
+      <h3 className="font-bold text-sm text-pixel-black">📝 发现新怪物</h3>
 
       <input
         value={form.name}
         onChange={(e) => setForm({ ...form, name: e.target.value })}
         placeholder="任务名称 *"
-        className="bg-white border border-[#333333] rounded px-3 py-2 text-sm text-[#333333] placeholder-[#666666]"
+        className="bg-white border border-pixel-black rounded px-3 py-2 text-sm text-pixel-black placeholder-[#666666]"
+        aria-label="任务名称"
       />
 
       <textarea
         value={form.description}
         onChange={(e) => setForm({ ...form, description: e.target.value })}
         placeholder="任务描述（选填）"
-        className="bg-white border border-[#333333] rounded px-3 py-2 text-sm text-[#333333] placeholder-[#666666] resize-none h-16"
+        className="bg-white border border-pixel-black rounded px-3 py-2 text-sm text-pixel-black placeholder-[#666666] resize-none h-16"
+        aria-label="任务描述"
       />
 
       <div className="flex gap-2">
@@ -68,8 +70,8 @@ export function TaskForm({ onClose }: { onClose: () => void }) {
             onClick={() => setForm({ ...form, category: c.value })}
             className={`text-xs px-2 py-1 rounded ${
               form.category === c.value
-                ? "bg-[#FF8844] text-white"
-                : "bg-white text-[#333333] hover:bg-[#DDEEFF]"
+                ? "bg-orange text-white"
+                : "bg-white text-pixel-black hover:bg-cloud"
             }`}
           >
             {c.label}
@@ -84,8 +86,8 @@ export function TaskForm({ onClose }: { onClose: () => void }) {
             onClick={() => setForm({ ...form, difficulty: d.value, estimated_pomodoros: d.defaultPomodoros })}
             className={`text-left text-xs px-2 py-1 rounded flex justify-between ${
               form.difficulty === d.value
-                ? "bg-[#FF8844]/20 text-[#FF8844]"
-                : "bg-white text-[#333333] hover:bg-[#DDEEFF]"
+                ? "bg-orange/20 text-orange"
+                : "bg-white text-pixel-black hover:bg-cloud"
             }`}
           >
             <span>
@@ -107,12 +109,13 @@ export function TaskForm({ onClose }: { onClose: () => void }) {
               estimated_pomodoros: Math.max(1, parseInt(e.target.value) || 1),
             })
           }
-          className="bg-white border border-[#333333] rounded px-2 py-1 w-16 text-sm text-center text-[#333333]"
+          className="bg-white border border-pixel-black rounded px-2 py-1 w-16 text-sm text-center text-pixel-black"
+          aria-label="预估番茄数"
         />
       </div>
 
       {showSplitWarning && (
-        <div className="bg-amber-100 border border-amber-400 rounded p-2 text-xs text-amber-700">
+        <div className="bg-sunny/10 border border-sunny rounded p-2 text-xs text-orange">
           ⚠️ 这个怪物太强大了！建议拆分成小任务以便逐个击破
         </div>
       )}
@@ -120,14 +123,14 @@ export function TaskForm({ onClose }: { onClose: () => void }) {
       <div className="flex justify-end gap-2 mt-2">
         <button
           onClick={onClose}
-          className="text-xs text-[#666666] hover:text-[#333333] px-3 py-1"
+          className="text-xs text-[#666666] hover:text-pixel-black px-3 py-1"
         >
           取消
         </button>
         <button
           onClick={handleSubmit}
           disabled={!form.name.trim()}
-          className="text-xs bg-[#FF8844] hover:bg-[#FF8844]/80 disabled:bg-[#666666] disabled:text-[#333333] text-white px-3 py-1 rounded pixel-border"
+          className="text-xs bg-orange hover:bg-orange/80 disabled:bg-[#666666] disabled:text-pixel-black text-white px-3 py-1 rounded pixel-border"
         >
           生成怪物
         </button>

@@ -1,0 +1,18 @@
+@title Rest Theme
+@tempo 62
+
+; Section A — Floating ambient (gentle, sparse)
+CH1: v6 o4 l1 e r g r a r g r e r g r a1&a1
+CH2: v4 o4 l1 r c r e r d r c r1 r e r d1&d1
+CH3: v7 o3 l1 c g a e c g d a c g a e c1&c1
+CH4: v2 l1 r1 r1 r2 r4 c4 r1 r1 r1 r1 r2 r4 c4 r1 r1
+; Section B — Deeper, warmer (more movement)
+CH1: v8 o4 l2 c d e g l1 a l2 g e d l1 c r v6 l2 e g a b l1 > c1
+CH2: v5 o4 l1 r e r g r1 r d r c r1 r g r e1
+CH3: v8 o3 l1 a e d g a e c g a e d g c1&c1
+CH4: v3 l2 r1 r1 r2 c2 r1 r1 r1 r2 c2 r1 r1
+; Section A' — Return, even softer
+CH1: v5 o4 l1 e r g r a r g r e r d r c1&c1
+CH2: v3 o4 l1 r c r e r d r c r1 r e r c1&c1
+CH3: v6 o3 l1 c g a e c g a e c g a e c1&c1
+CH4: v1 l1 r1 r1 r1 r2 r4 c4 r1 r1 r1 r1 r1 r1

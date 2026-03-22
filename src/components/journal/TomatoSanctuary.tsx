@@ -45,7 +45,7 @@ export function TomatoSanctuary() {
       <div className="flex flex-col gap-4">
         <button
           onClick={() => setSelected(null)}
-          className="text-xs text-[#666666] hover:text-[#333333] self-start"
+          className="text-xs text-[#666666] hover:text-pixel-black self-start"
         >
           {NARRATIVE.journalBack}
         </button>
@@ -53,7 +53,7 @@ export function TomatoSanctuary() {
           <div className="flex items-center gap-2">
             <span className="text-2xl">🍅</span>
             <div>
-              <h2 className="text-lg font-bold text-[#333333]">
+              <h2 className="text-lg font-bold text-pixel-black">
                 {selected.task.monster_name}
               </h2>
               <p className="text-sm text-[#666666]">{selected.task.name}</p>
@@ -74,15 +74,15 @@ export function TomatoSanctuary() {
             </div>
           )}
           <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-            <div className="bg-[#DDEEFF] rounded p-2 pixel-border">
+            <div className="bg-cloud rounded p-2 pixel-border">
               <span className="text-[#666666]">预估番茄</span>
-              <span className="block text-lg font-bold pixel-title text-[#333333]">
+              <span className="block text-lg font-bold pixel-title text-pixel-black">
                 {selected.task.estimated_pomodoros}
               </span>
             </div>
-            <div className="bg-[#DDEEFF] rounded p-2 pixel-border">
+            <div className="bg-cloud rounded p-2 pixel-border">
               <span className="text-[#666666]">实际番茄</span>
-              <span className="block text-lg font-bold pixel-title text-[#333333]">
+              <span className="block text-lg font-bold pixel-title text-pixel-black">
                 {selected.task.actual_pomodoros}
               </span>
             </div>
@@ -97,11 +97,11 @@ export function TomatoSanctuary() {
             key={p.id}
             className="bg-white rounded p-3 text-sm pixel-border"
           >
-            <div className="font-bold text-[#333333]">
+            <div className="font-bold text-pixel-black">
               {p.completion_note || "（无记录）"}
             </div>
             {p.strategy_note && (
-              <div className="text-xs text-[#FF8844] mt-1">
+              <div className="text-xs text-orange mt-1">
                 🎯 策略：{p.strategy_note}
               </div>
             )}
@@ -153,12 +153,12 @@ export function TomatoSanctuary() {
         <button
           key={entry.task.id}
           onClick={() => setSelected(entry)}
-          className="bg-white rounded p-3 text-left hover:bg-[#DDEEFF] pixel-border"
+          className="bg-white rounded p-3 text-left hover:bg-cloud pixel-border"
         >
           <div className="flex items-center gap-2">
             <span>🍅</span>
             <div>
-              <div className="font-bold text-sm text-[#333333]">
+              <div className="font-bold text-sm text-pixel-black">
                 {entry.task.monster_name}
               </div>
               <div className="text-xs text-[#666666]">

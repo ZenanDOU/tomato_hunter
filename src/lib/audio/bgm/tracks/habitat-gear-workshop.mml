@@ -1,0 +1,18 @@
+@title Gear Workshop Ruins
+@tempo 140
+
+; Section A — Mechanical urgency, minor key, driving rhythm
+CH1: v13 o4 l16 e f g e f g a g l8 e r e r l16 g a b g a b > c < b l8 g r g r l16 [e f g e a g f e]2 e8 r8 g8 r8 e4
+CH2: v9 o4 l8 r e r e r g r g r e r e r f r f r e r e r g r g r e r e r e r e
+CH3: v11 o2 l8 e e r e e r e e g g r g g r g g e e r e e r e e a a r a b b r b
+CH4: v8 l16 c r c c r c r c c r c c r c r c [c r c c r r c c]2 c r c c r c r c c c r c r c c r
+; Section B — Breakdown, shifting pattern, more chaotic
+CH1: v11 o4 l16 b a g f e f g a l8 b r a r l16 g f e d e f g a l8 g4 r4 l16 [b a g f e d e f]2 g8 r8 e8 r8 g4
+CH2: v8 o4 l8 r g r f r e r d r g r f r e r f r g r a r g r f r e r d r e r e
+CH3: v10 o2 l8 g g r g g r g g a a r a a r b b g g r g g r g g e e r e e r e e
+CH4: v9 l16 [c c r c r c c r]4 c r r c c r c r [c c r r c r c c]2 c r c r c r c r
+; Section A' — Return, tighter, higher energy
+CH1: v14 o4 l16 e f g e f g a g l8 e r e r l16 g a b g a b > c < b l8 g r g r l16 e f g e a g f e g a b g e8 r8 l8 g a b > c < b a g4
+CH2: v9 o4 l8 r e r e r g r g r e r e r f r f r e r g r e r g r e r e r e r e
+CH3: v12 o2 l8 e e r e e r e e g g r g g r g g e e r e e r e e a a r a g g r e
+CH4: v8 l16 c r c c r c r c c r c c r c r c [c r c c r r c c]2 c r c c r c c c c r c r c4

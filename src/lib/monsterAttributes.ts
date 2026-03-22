@@ -3,11 +3,11 @@ import { selectSpecies } from "./bestiary";
 
 /** 分类对应的标签颜色 */
 export const CATEGORY_TAG_COLOR: Record<TaskCategory, string> = {
-  work: "bg-blue-500/20 text-blue-400",
-  study: "bg-purple-500/20 text-purple-400",
-  creative: "bg-pink-500/20 text-pink-400",
-  life: "bg-green-500/20 text-green-400",
-  other: "bg-stone-500/20 text-stone-400",
+  work: "bg-[#FF8844]/20 text-[#FF8844]",
+  creative: "bg-[#8877AA]/20 text-[#8877AA]",
+  study: "bg-[#5588CC]/20 text-[#5588CC]",
+  life: "bg-[#5BBF47]/20 text-[#5BBF47]",
+  other: "bg-[#55AAAA]/20 text-[#55AAAA]",
 };
 
 /**

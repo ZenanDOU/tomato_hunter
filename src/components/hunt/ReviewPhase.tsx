@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import type { TimerState, ReflectionType } from "../../types";
+import { useInventoryStore } from "../../stores/inventoryStore";
 import { PixelProgressBar } from "../common/PixelProgressBar";
 import { PixelButton } from "../common/PixelButton";
 import { formatTime } from "../../lib/format";
 import { NARRATIVE } from "../../lib/narrative";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 interface ReviewPhaseProps {
   timer: TimerState;
@@ -11,7 +13,7 @@ interface ReviewPhaseProps {
     note: string,
     reflType: ReflectionType | null,
     reflText: string
-  ) => void;
+  ) => void | Promise<void>;
 }
 
 const reflectionOptions: { value: ReflectionType; label: string }[] = [
@@ -20,26 +22,62 @@ const reflectionOptions: { value: ReflectionType; label: string }[] = [
   { value: "discovery", label: "有新的想法或发现？" },
 ];
 
-export function ReviewPhase({ timer, onComplete }: ReviewPhaseProps) {
+const SKIP_REVIEW_ID = 12;
+
+export const ReviewPhase = memo(function ReviewPhase({ timer, onComplete }: ReviewPhaseProps) {
   const [completionNote, setCompletionNote] = useState("");
   const [reflectionType, setReflectionType] =
     useState<ReflectionType | null>(null);
   const [reflectionText, setReflectionText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { ownedEquipment, useConsumable, fetchAll } = useInventoryStore();
 
-  const handleSubmit = () => {
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
+
+  const skipReviewQty = ownedEquipment.find((e) => e.equipment.id === SKIP_REVIEW_ID)?.quantity || 0;
+
+  const handleSkipReview = useCallback(async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const ok = await useConsumable(SKIP_REVIEW_ID);
+      if (ok) {
+        await onComplete("（跳过复盘）", null, "");
+      } else {
+        setSubmitting(false);
+      }
+    } catch (error) {
+      console.error("[ReviewPhase] skip failed:", error);
+      setSubmitting(false);
+    }
+  }, [submitting, useConsumable, onComplete]);
+
+  const handleSubmit = useCallback(async () => {
     if (!completionNote.trim() || submitting) return;
     setSubmitting(true);
-    onComplete(completionNote, reflectionType, reflectionText);
-  };
+    try {
+      await onComplete(completionNote, reflectionType, reflectionText);
+    } catch (error) {
+      console.error("[ReviewPhase] submit failed:", error);
+      setSubmitting(false);
+    }
+  }, [completionNote, submitting, onComplete, reflectionType, reflectionText]);
 
   return (
-    <div className="bg-[#FFF8E8] text-[#333333] p-6 min-h-screen flex flex-col gap-4">
+    <div
+      className="bg-cream text-pixel-black p-6 min-h-screen flex flex-col gap-4"
+      onMouseDown={(e) => {
+        if ((e.target as HTMLElement).closest("button,input,textarea")) return;
+        getCurrentWindow().startDragging();
+      }}
+    >
       <div className="flex justify-between items-center">
-        <span className="text-sm text-[#5BBF47] pixel-title">
+        <span className="text-sm text-grass pixel-title">
           {NARRATIVE.reviewPhase}
         </span>
-        <span className="text-sm text-[#333333]/40 pixel-title">
+        <span className="text-sm text-pixel-black/40 pixel-title">
           {formatTime(timer.pomodoro_remaining_seconds)}
         </span>
       </div>
@@ -50,14 +88,15 @@ export function ReviewPhase({ timer, onComplete }: ReviewPhaseProps) {
       />
 
       <label className="text-sm">
-        ✅ 你完成了什么？<span className="text-[#EE4433]">*</span>
+        ✅ 你完成了什么？<span className="text-tomato">*</span>
       </label>
       <textarea
         value={completionNote}
         onChange={(e) => setCompletionNote(e.target.value)}
-        className="bg-white outline-2 outline-[#333333] outline-offset-[-2px] p-3 text-sm resize-none h-24 text-[#333333] placeholder-[#333333]/40"
+        className="bg-white outline-2 outline-pixel-black outline-offset-[-2px] p-3 text-sm resize-none h-24 text-pixel-black placeholder-pixel-black/40"
         placeholder="简要描述本次完成的内容..."
         autoFocus
+        aria-label="完成内容"
       />
 
       <label className="text-sm">💡 反思（选填）</label>
@@ -72,8 +111,8 @@ export function ReviewPhase({ timer, onComplete }: ReviewPhaseProps) {
             }
             className={`text-left text-xs px-2 py-1 ${
               reflectionType === opt.value
-                ? "bg-[#FFD93D]/30 text-[#333333]"
-                : "bg-white text-[#333333]/60 hover:bg-[#DDEEFF]"
+                ? "bg-sunny/30 text-pixel-black"
+                : "bg-white text-pixel-black/60 hover:bg-cloud"
             }`}
           >
             {opt.label}
@@ -85,20 +124,33 @@ export function ReviewPhase({ timer, onComplete }: ReviewPhaseProps) {
         <textarea
           value={reflectionText}
           onChange={(e) => setReflectionText(e.target.value)}
-          className="bg-white outline-2 outline-[#333333] outline-offset-[-2px] p-3 text-sm resize-none h-16 text-[#333333] placeholder-[#333333]/40"
+          className="bg-white outline-2 outline-pixel-black outline-offset-[-2px] p-3 text-sm resize-none h-16 text-pixel-black placeholder-pixel-black/40"
           placeholder="写下你的想法..."
+          aria-label="反思内容"
         />
       )}
 
-      <PixelButton
-        variant="cta"
-        size="lg"
-        onClick={handleSubmit}
-        disabled={!completionNote.trim() || submitting}
-        className="mt-auto w-full"
-      >
-        {submitting ? "处理中..." : NARRATIVE.reviewComplete}
-      </PixelButton>
+      <div className="flex gap-2 mt-auto">
+        {skipReviewQty > 0 && (
+          <button
+            onClick={handleSkipReview}
+            disabled={submitting}
+            className="text-xs text-pixel-black/40 hover:text-pixel-black px-3 py-2 flex items-center gap-1"
+            title="复盘跳过 · 跳过本次复盘"
+          >
+            ⏭ 跳过<span className="text-[10px]">×{skipReviewQty}</span>
+          </button>
+        )}
+        <PixelButton
+          variant="cta"
+          size="lg"
+          onClick={handleSubmit}
+          disabled={!completionNote.trim() || submitting}
+          className="flex-1"
+        >
+          {submitting ? "处理中..." : NARRATIVE.reviewComplete}
+        </PixelButton>
+      </div>
     </div>
   );
-}
+});

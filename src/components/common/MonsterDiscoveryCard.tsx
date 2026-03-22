@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import type { TaskCategory, TaskDifficulty } from "../../types";
 import type { MonsterSpecies } from "../../lib/bestiary";
 import { AttributeTag } from "./AttributeTag";
@@ -12,6 +13,7 @@ interface MonsterDiscoveryCardProps {
   hp: number;
   attributes: string[];
   category: TaskCategory;
+  confirming?: boolean;
   onConfirm: () => void;
 }
 
@@ -31,13 +33,14 @@ export function MonsterDiscoveryCard({
   hp,
   attributes,
   category,
+  confirming,
   onConfirm,
 }: MonsterDiscoveryCardProps) {
   const diff = DIFFICULTY_LABELS[difficulty];
 
-  return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#443355] border-2 border-[#333333] pixel-border rounded-lg p-6 max-w-sm w-full flex flex-col items-center gap-4">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-label="怪物发现">
+      <div className="bg-monster-bg border-2 border-pixel-black pixel-border rounded-lg p-6 max-w-sm w-full flex flex-col items-center gap-4">
         {/* Monster sprite */}
         {SPRITE_DATA[species.id] ? (
           <PixelSprite sprite={SPRITE_DATA[species.id]} scale={3} />
@@ -46,7 +49,7 @@ export function MonsterDiscoveryCard({
         )}
 
         {/* Name */}
-        <h2 className="pixel-title text-lg font-bold text-[#FFD93D] text-center">
+        <h2 className="pixel-title text-lg font-bold text-sunny text-center">
           「{monsterName}」
         </h2>
 
@@ -76,11 +79,13 @@ export function MonsterDiscoveryCard({
         {/* Confirm button */}
         <button
           onClick={onConfirm}
-          className="w-full bg-[#FF8844] hover:bg-[#FF8844]/80 text-white rounded py-2 text-sm font-bold pixel-border mt-2"
+          disabled={confirming}
+          className="w-full bg-orange hover:bg-orange/80 text-white rounded py-2 text-sm font-bold pixel-border mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          ⚔️ 加入讨伐清单
+          {confirming ? "加入中..." : "⚔️ 加入讨伐清单"}
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,0 +1,18 @@
+@title Mist Swamp
+@tempo 60
+
+; Section A — Eerie, uneasy, whole-tone scale
+CH1: v9 o4 l4 c d f+ a- l2 r l4 d- e g b- l1 r l4 c d f+ a- r2 d-2
+CH2: v6 o4 l2 r f+ r a- r d- r e l1 r
+CH3: v8 o3 l1 c f+ d- a- c f+ c1
+CH4: v4 l8 r4 c r r r c r r4 r c r r r r r r4 c r r r c r r4 r c r4 r r
+; Section B — Darker, more dissonant, thicker
+CH1: v11 o4 l4 f+ a- b- > d- l2 r l4 < e g a- > c l1 r l4 < f+ a- b- > d- r2 l2 < e1
+CH2: v7 o4 l2 r a- r b- r e r g l1 r
+CH3: v9 o3 l1 f+ b- e a- f+ b- e1
+CH4: v5 l8 r c r c r r c r r4 c r c r r r r c r c r r c r r4 c r4 r r
+; Section A' — Settling, fading into mist
+CH1: v7 o4 l4 c d f+ a- l2 r l4 d- e g b- l1 r l2 c d l1 f+1
+CH2: v5 o4 l2 r f+ r a- r d- l1 r r e1
+CH3: v7 o3 l1 c f+ d- a- c f+ c1
+CH4: v3 l8 r4 c r r r r r r4 r c r r r r r r1 r4 c r4 r r

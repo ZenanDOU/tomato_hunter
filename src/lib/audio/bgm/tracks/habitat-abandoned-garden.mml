@@ -1,0 +1,18 @@
+@title Abandoned Garden
+@tempo 100
+
+; Section A — Natural, warm, pentatonic melody
+CH1: v12 o4 l8 c d e g a e g e c d e g a > c < a g e4 d4 c4 r4 c d e g a > c < a g e2
+CH2: v8 o4 l4 e g a g e g a e e g a g e g a2
+CH3: v10 o3 l4 c g a e c g a e c g a e c2 r2
+CH4: v5 l8 c r r c r c r r c r r c r c r r c r r c r c r r c r r c r c r r
+; Section B — More melodic, exploring higher range
+CH1: v10 o4 l8 a > c d e d c < a g a4 e4 d8 e8 g4 a8 > c8 < a8 g8 e4 r4 a > c d e g4. r8 d4 c4 < a2
+CH2: v7 o4 l4 a > c d < a g > c d a < a > c d < a g4 a4 e2
+CH3: v9 o3 l4 a e g > c < a e d g a e g > c < a2 r2
+CH4: v6 l8 r c r c r r c r [c r r c r c r r]2 r c r c r r c r r4 c8 r8 c4
+; Section A' — Gentle return
+CH1: v13 o4 l8 c d e g a e g e c d e g a > c < a g e4 d4 l16 c d e d l8 c d e g a > c < a g l4 e g e2
+CH2: v8 o4 l4 e g a g e g a e e g a g e g l2 e c
+CH3: v10 o3 l4 c g a e c g a e c g a e l2 c1
+CH4: v5 l8 c r r c r c r r [c r r c r c r r]2 c r r c r4 c4

@@ -12,7 +12,8 @@ export type TaskStatus =
   | "ready"
   | "hunting"
   | "killed"
-  | "abandoned";
+  | "abandoned"
+  | "released";
 
 export interface Task {
   id: number;
@@ -25,6 +26,7 @@ export interface Task {
   monster_name: string;
   monster_description: string;
   monster_variant: string;
+  species_id: string | null;
   status: TaskStatus;
   total_hp: number;
   current_hp: number;
@@ -70,7 +72,11 @@ export type TimerPhase =
   | "focus"
   | "review"
   | "break"
-  | "long_break";
+  | "long_break"
+  | "awaiting_choice"
+  | "dagger_rest";
+
+export type TimerMode = "sword" | "dagger" | "hammer";
 
 export interface TimerState {
   phase: TimerPhase;
@@ -83,31 +89,31 @@ export interface TimerState {
   pomodoro_id: number | null;
   rounds_completed: number;
   is_paused: boolean;
+  timer_mode: TimerMode;
+  dagger_action_count: number;
+  hammer_focus_elapsed: number;
 }
 
 // === Equipment ===
 
 export type EquipmentType = "weapon" | "armor" | "item";
 
+export type AudioMode = "silent" | "white-noise" | "interval-alert";
+
 export interface WeaponEffect {
-  type: "timer";
-  focus_minutes: number;
-  break_minutes: number;
-  long_break_minutes: number;
-  rounds_before_long_break: number;
+  type: "timer_mode";
+  mode: TimerMode;
 }
 
 export interface ArmorEffect {
-  type: "tolerance";
-  max_pause_duration_seconds: number;
-  allow_brief_interrupt: boolean;
-  brief_interrupt_seconds: number;
+  type: "audio_mode";
+  mode: AudioMode;
 }
 
 export interface ConsumableEffect {
   type: "consumable";
-  action: "pause" | "extend_focus" | "skip_prep" | "bonus_loot";
-  value: number;
+  action: "pause" | "extend_focus" | "extend_break" | "shorten_focus" | "skip_prep" | "skip_review" | "double_loot" | "fertilizer";
+  value?: number;
 }
 
 export type EquipmentEffect = WeaponEffect | ArmorEffect | ConsumableEffect;
@@ -121,6 +127,7 @@ export interface Equipment {
   recipe: Record<number, number>;
   unlocked: boolean;
   is_consumable: boolean;
+  price: number | null;
 }
 
 export interface Loadout {
@@ -151,6 +158,7 @@ export interface LootDrop {
 export interface DailyPlan {
   date: string;
   total_budget: number;
+  removed_completed: number;
   entries: PlannedTaskEntry[];
 }
 
@@ -160,11 +168,48 @@ export interface PlannedTaskEntry {
   planned_pomodoros_today: number;
   completed_pomodoros_today: number;
   sort_order: number;
-  // joined fields from task
-  name?: string;
-  monster_name?: string;
-  category?: TaskCategory;
-  status?: TaskStatus;
-  current_hp?: number;
-  total_hp?: number;
+}
+
+// === Sprite ===
+
+export type SpriteFrame = number[][]; // 32x32 grid, each cell is palette index (0 = transparent)
+
+export interface SpriteData {
+  palette: string[];
+  frames: {
+    idle: SpriteFrame[];    // 2 frames
+    hit: SpriteFrame[];     // 1 frame
+    defeat: SpriteFrame[];  // 2 frames
+  };
+}
+
+export interface LegacySpriteData {
+  width: number;
+  height: number;
+  pixels: string;
+  palette: string[];
+}
+
+export type SpriteAnimation = "idle" | "hit" | "defeat";
+
+// === Hunter Profile ===
+
+export interface HunterStats {
+  totalPomodoros: number;
+  totalKills: number;
+  speciesDiscovered: number;
+  activeDays: number;
+  longestStreak: number;
+}
+
+export interface MilestoneRecord {
+  id: string;
+  achieved_at: string;
+  notified: number;
+}
+
+export interface SpeciesDiscovery {
+  speciesId: string;
+  firstKillDate: string;
+  killCount: number;
 }
