@@ -1,3 +1,9 @@
+## REMOVED Requirements
+
+### Requirement: Transaction wrapper for multi-step database operations
+**Reason**: `withTransaction()` 在 tauri-plugin-sql + sqlx::Pool 架构下不可能正确工作。每次 IPC `execute()` 调用从 FIFO 连接池获取不同连接，`BEGIN` 和 `COMMIT` 必然落在不同连接上，导致 100% 失败。
+**Migration**: 所有调用点改为顺序 `db.execute()` 调用，依赖 SQLite 自动提交模式。
+
 ## ADDED Requirements
 
 ### Requirement: Multi-step database operations use sequential autocommit
@@ -25,14 +31,3 @@
 #### Scenario: Pursuit button also has re-entry protection
 - **WHEN** 用户点击"确认追击"按钮
 - **THEN** 按钮 SHALL 同样立即进入 disabled 状态，防止重复提交
-
-### Requirement: backfillSpeciesIds runs only once per app lifecycle
-The `backfillSpeciesIds` function SHALL execute at most once per application lifecycle. Subsequent calls to `getDb()` SHALL NOT re-run the backfill even if the database connection is re-established.
-
-#### Scenario: First getDb call runs backfill
-- **WHEN** `getDb()` is called for the first time in the app lifecycle
-- **THEN** `backfillSpeciesIds` SHALL execute if there are tasks with NULL species_id
-
-#### Scenario: Subsequent getDb calls skip backfill
-- **WHEN** `getDb()` is called after the first successful call
-- **THEN** `backfillSpeciesIds` SHALL NOT execute again

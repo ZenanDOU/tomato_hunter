@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { Task, TaskFormData, TaskStatus } from "../types";
-import { getDb, withTransaction } from "../lib/db";
+import { getDb } from "../lib/db";
 
 interface TaskStore {
   tasks: Task[];
@@ -134,8 +134,43 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
   releaseTask: async (id) => {
     try {
-      await withTransaction(async (db) => {
-        const now = new Date().toISOString();
+      const db = await getDb();
+      const now = new Date().toISOString();
+      const children = await db.select<{ id: number }[]>(
+        "SELECT id FROM tasks WHERE parent_task_id = $1",
+        [id]
+      );
+      await db.execute(
+        "UPDATE tasks SET status = 'released', completed_at = $1 WHERE id = $2",
+        [now, id]
+      );
+      if (children.length > 0) {
+        await db.execute(
+          "UPDATE tasks SET status = 'released', completed_at = $1 WHERE parent_task_id = $2",
+          [now, id]
+        );
+      }
+      await db.execute(
+        "DELETE FROM planned_task_entries WHERE task_id = $1",
+        [id]
+      );
+      for (const child of children) {
+        await db.execute(
+          "DELETE FROM planned_task_entries WHERE task_id = $1",
+          [child.id]
+        );
+      }
+    } catch (error) {
+      console.error("[TaskStore] releaseTask failed:", error);
+      throw error;
+    }
+  },
+
+  batchReleaseTasks: async (ids) => {
+    try {
+      const db = await getDb();
+      const now = new Date().toISOString();
+      for (const id of ids) {
         const children = await db.select<{ id: number }[]>(
           "SELECT id FROM tasks WHERE parent_task_id = $1",
           [id]
@@ -160,44 +195,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
             [child.id]
           );
         }
-      });
-    } catch (error) {
-      console.error("[TaskStore] releaseTask failed:", error);
-      throw error;
-    }
-  },
-
-  batchReleaseTasks: async (ids) => {
-    try {
-      await withTransaction(async (db) => {
-        const now = new Date().toISOString();
-        for (const id of ids) {
-          const children = await db.select<{ id: number }[]>(
-            "SELECT id FROM tasks WHERE parent_task_id = $1",
-            [id]
-          );
-          await db.execute(
-            "UPDATE tasks SET status = 'released', completed_at = $1 WHERE id = $2",
-            [now, id]
-          );
-          if (children.length > 0) {
-            await db.execute(
-              "UPDATE tasks SET status = 'released', completed_at = $1 WHERE parent_task_id = $2",
-              [now, id]
-            );
-          }
-          await db.execute(
-            "DELETE FROM planned_task_entries WHERE task_id = $1",
-            [id]
-          );
-          for (const child of children) {
-            await db.execute(
-              "DELETE FROM planned_task_entries WHERE task_id = $1",
-              [child.id]
-            );
-          }
-        }
-      });
+      }
     } catch (error) {
       console.error("[TaskStore] batchReleaseTasks failed:", error);
       throw error;
@@ -206,30 +204,29 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
   killTask: async (id) => {
     try {
-      await withTransaction(async (db) => {
-        const now = new Date().toISOString();
-        await db.execute(
-          `UPDATE tasks SET status = 'killed', completed_at = $1 WHERE id = $2`,
-          [now, id]
+      const db = await getDb();
+      const now = new Date().toISOString();
+      await db.execute(
+        `UPDATE tasks SET status = 'killed', completed_at = $1 WHERE id = $2`,
+        [now, id]
+      );
+      // Auto-complete parent if all siblings are killed
+      const rows = await db.select<Task[]>(
+        "SELECT * FROM tasks WHERE id = $1",
+        [id]
+      );
+      if (rows[0]?.parent_task_id) {
+        const siblings = await db.select<{ status: string }[]>(
+          "SELECT status FROM tasks WHERE parent_task_id = $1",
+          [rows[0].parent_task_id]
         );
-        // Auto-complete parent if all siblings are killed
-        const rows = await db.select<Task[]>(
-          "SELECT * FROM tasks WHERE id = $1",
-          [id]
-        );
-        if (rows[0]?.parent_task_id) {
-          const siblings = await db.select<{ status: string }[]>(
-            "SELECT status FROM tasks WHERE parent_task_id = $1",
-            [rows[0].parent_task_id]
+        if (siblings.length > 0 && siblings.every((s) => s.status === "killed")) {
+          await db.execute(
+            `UPDATE tasks SET status = 'killed', completed_at = $1 WHERE id = $2`,
+            [now, rows[0].parent_task_id]
           );
-          if (siblings.length > 0 && siblings.every((s) => s.status === "killed")) {
-            await db.execute(
-              `UPDATE tasks SET status = 'killed', completed_at = $1 WHERE id = $2`,
-              [now, rows[0].parent_task_id]
-            );
-          }
         }
-      });
+      }
     } catch (error) {
       console.error("[TaskStore] killTask failed:", error);
       throw error;

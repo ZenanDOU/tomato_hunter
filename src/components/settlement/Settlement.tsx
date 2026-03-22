@@ -46,6 +46,7 @@ export function Settlement({ drops, hpReachedZero, unlockedRecipes, showFirstKil
   const [discoveredSpeciesId, setDiscoveredSpeciesId] = useState<string | null>(null);
   const [showDiscovery, setShowDiscovery] = useState(false);
   const [showMilestone, setShowMilestone] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const task = tasks.find((t) => t.id === timer.task_id);
 
@@ -70,7 +71,8 @@ export function Settlement({ drops, hpReachedZero, unlockedRecipes, showFirstKil
   }, [task]);
 
   const handleConfirmKill = async () => {
-    if (!task) return;
+    if (!task || isProcessing) return;
+    setIsProcessing(true);
     await killTask(task.id);
     await syncAfterTaskRelease();
     audioManager.playSfx("monster-down");
@@ -111,7 +113,8 @@ export function Settlement({ drops, hpReachedZero, unlockedRecipes, showFirstKil
   };
 
   const handleConfirmPursuit = async () => {
-    if (!task) return;
+    if (!task || isProcessing) return;
+    setIsProcessing(true);
     const inv = useInventoryStore.getState();
     // Pursuit scroll = equipment ID 14 (追踪术卷轴)
     const hasScroll = inv.ownedEquipment.some(
@@ -256,15 +259,16 @@ export function Settlement({ drops, hpReachedZero, unlockedRecipes, showFirstKil
               size="lg"
               onClick={handleConfirmKill}
               className="flex-1"
+              disabled={isProcessing}
             >
-              确认击杀 ⚔️
+              {isProcessing ? "处理中..." : "确认击杀 ⚔️"}
             </PixelButton>
             <PixelButton
               variant="default"
               size="lg"
               onClick={handleStartPursuit}
               className="flex-1"
-              disabled={!hasScroll}
+              disabled={!hasScroll || isProcessing}
               title={!hasScroll ? "需要追踪术卷轴" : undefined}
             >
               发起追击 🔍
@@ -307,8 +311,9 @@ export function Settlement({ drops, hpReachedZero, unlockedRecipes, showFirstKil
               size="lg"
               onClick={handleConfirmPursuit}
               className="flex-1"
+              disabled={isProcessing}
             >
-              确认追击
+              {isProcessing ? "处理中..." : "确认追击"}
             </PixelButton>
             <PixelButton
               variant="default"

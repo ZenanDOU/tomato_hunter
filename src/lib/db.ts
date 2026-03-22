@@ -16,25 +16,6 @@ export async function getDb(): Promise<Database> {
   return db;
 }
 
-export async function withTransaction<T>(
-  fn: (db: Database) => Promise<T>
-): Promise<T> {
-  const database = await getDb();
-  await database.execute("BEGIN");
-  try {
-    const result = await fn(database);
-    await database.execute("COMMIT");
-    return result;
-  } catch (error) {
-    try {
-      await database.execute("ROLLBACK");
-    } catch (rollbackErr) {
-      console.error("[DB] ROLLBACK failed:", rollbackErr);
-    }
-    throw error;
-  }
-}
-
 async function backfillSpeciesIds(database: Database): Promise<void> {
   try {
     const rows = await database.select<

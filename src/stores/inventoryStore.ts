@@ -9,7 +9,7 @@ import type {
   TimerMode,
   AudioMode,
 } from "../types";
-import { getDb, withTransaction } from "../lib/db";
+import { getDb } from "../lib/db";
 import { useFarmStore } from "./farmStore";
 
 interface MaterialEntry {
@@ -115,27 +115,25 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       const equip = get().allEquipment.find((e) => e.id === equipmentId);
       if (!equip || !equip.unlocked || equip.is_consumable) return false;
 
-      const success = await withTransaction(async (db) => {
-        for (const [matId, needed] of Object.entries(equip.recipe)) {
-          const result = await db.execute(
-            "UPDATE player_materials SET quantity = quantity - $1 WHERE material_id = $2 AND quantity >= $1",
-            [needed as number, Number(matId)]
-          );
-          if (result.rowsAffected === 0) {
-            throw new Error(`Insufficient material ${matId}`);
-          }
-        }
-
-        await db.execute(
-          `INSERT INTO player_equipment (equipment_id, quantity) VALUES ($1, 1)
-         ON CONFLICT(equipment_id) DO UPDATE SET quantity = quantity + 1`,
-          [equipmentId]
+      const db = await getDb();
+      for (const [matId, needed] of Object.entries(equip.recipe)) {
+        const result = await db.execute(
+          "UPDATE player_materials SET quantity = quantity - $1 WHERE material_id = $2 AND quantity >= $1",
+          [needed as number, Number(matId)]
         );
-        return true;
-      });
+        if (result.rowsAffected === 0) {
+          throw new Error(`Insufficient material ${matId}`);
+        }
+      }
+
+      await db.execute(
+        `INSERT INTO player_equipment (equipment_id, quantity) VALUES ($1, 1)
+         ON CONFLICT(equipment_id) DO UPDATE SET quantity = quantity + 1`,
+        [equipmentId]
+      );
 
       await get().fetchAll();
-      return success;
+      return true;
     } catch (error) {
       if ((error as Error).message?.startsWith("Insufficient material")) {
         return false;

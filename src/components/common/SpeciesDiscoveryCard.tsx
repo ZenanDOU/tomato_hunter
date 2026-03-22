@@ -1,4 +1,5 @@
 import { BESTIARY } from "../../lib/bestiary";
+import { getSpriteData } from "../../lib/spriteData";
 import { PixelCard } from "./PixelCard";
 import { PixelButton } from "./PixelButton";
 import { PixelSprite } from "./PixelSprite";
@@ -12,13 +13,15 @@ export function SpeciesDiscoveryCard({ speciesId, onDismiss }: SpeciesDiscoveryC
   const species = BESTIARY.find((s) => s.id === speciesId);
   if (!species) return null;
 
+  const sprite = getSpriteData(species.id);
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <PixelCard bg="cream" padding="lg" className="max-w-xs w-full flex flex-col items-center gap-3 text-center">
         <p className="text-xs text-grass font-bold">新物种发现！</p>
         <div className="text-4xl">
-          {species.spriteData ? (
-            <PixelSprite sprite={species.spriteData} animation="idle" scale={4} />
+          {sprite ? (
+            <PixelSprite sprite={sprite} animation="idle" scale={4} />
           ) : (
             <span className="monster-sprite">{species.emoji}</span>
           )}

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { DailyPlan, PlannedTaskEntry } from "../types";
-import { getDb, withTransaction } from "../lib/db";
+import { getDb } from "../lib/db";
 import { useTaskStore } from "./taskStore";
 
 interface PlanStore {
@@ -108,22 +108,21 @@ export const usePlanStore = create<PlanStore>((set, get) => ({
 
   removeTaskFromPlan: async (entryId) => {
     try {
-      await withTransaction(async (db) => {
-        const rows = await db.select<{ completed_pomodoros_today: number }[]>(
-          "SELECT completed_pomodoros_today FROM planned_task_entries WHERE id = $1",
-          [entryId]
+      const db = await getDb();
+      const rows = await db.select<{ completed_pomodoros_today: number }[]>(
+        "SELECT completed_pomodoros_today FROM planned_task_entries WHERE id = $1",
+        [entryId]
+      );
+      const completed = rows.length > 0 ? rows[0].completed_pomodoros_today : 0;
+      if (completed > 0) {
+        await db.execute(
+          "UPDATE daily_plans SET removed_completed = removed_completed + $1 WHERE date = $2",
+          [completed, todayStr()]
         );
-        const completed = rows.length > 0 ? rows[0].completed_pomodoros_today : 0;
-        if (completed > 0) {
-          await db.execute(
-            "UPDATE daily_plans SET removed_completed = removed_completed + $1 WHERE date = $2",
-            [completed, todayStr()]
-          );
-        }
-        await db.execute("DELETE FROM planned_task_entries WHERE id = $1", [
-          entryId,
-        ]);
-      });
+      }
+      await db.execute("DELETE FROM planned_task_entries WHERE id = $1", [
+        entryId,
+      ]);
       await get().fetchTodayPlan();
     } catch (error) {
       console.error("[PlanStore] removeTaskFromPlan failed:", error);
